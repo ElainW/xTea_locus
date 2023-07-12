@@ -826,13 +826,13 @@ class TELocator():
         
         ####cnt number of clipped reads aligned to repeat copies from the re-alignment
         # YW 2021/03/18 add Alu, L1, SVA
-        clip_info.cnt_clip_part_aligned_to_rep(sf_algnmt_Alu, sf_algnmt_L1, sf_algnmt_SVA)  ##require at least 3/4 of the seq is mapped !!!!
+        clip_info.cnt_clip_part_aligned_to_rep_locus(sf_algnmt_Alu, sf_algnmt_L1, sf_algnmt_SVA)  ##require at least 3/4 of the seq is mapped !!!!
 
         # if b_cutoff is set, then directly return the dict
         if b_cutoff == False:
             clip_info.merge_clip_positions(sf_pub_folder, sf_out)
         else:
-            clip_info.merge_clip_positions_with_cutoff(cutoff_left_clip, cutoff_right_clip, max_cov_cutoff, sf_pub_folder, sf_out)
+            clip_info.merge_clip_positions_with_cutoff_locus(cutoff_left_clip, cutoff_right_clip, max_cov_cutoff, sf_pub_folder, sf_out)
         if os.path.isfile(sf_algnmt_Alu)==True:####remove the file
             os.remove(sf_algnmt_Alu)
         if os.path.isfile(sf_algnmt_L1)==True:####remove the file

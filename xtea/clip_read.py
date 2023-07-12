@@ -1312,6 +1312,7 @@ class ClipReadInfo():
                         for line in fin_realign_clip_chrm:
                             fields = line.split()
                             m_realign_pos[int(fields[0])] = "\t".join(fields[1:])
+                    os.remove(sf_chrm_re_align_clip_pos)
 
                 sf_clip_pos = sf_pclip + chrm + global_values.CLIP_POS_SUFFIX
                 if os.path.isfile(sf_clip_pos) == False:
@@ -1333,11 +1334,51 @@ class ClipReadInfo():
                         else:
                             fout_clip_pos.write(chrm + "\t")
                             fout_clip_pos.write(line.rstrip() + "\t")
-                            fout_clip_pos.write("0\t0\n")
-                #os.remove(sf_clip_pos)
+                            fout_clip_pos.write("\t".join([str(0)]*2) + "\n")
+                os.remove(sf_clip_pos)
         samfile.close()
 
     ####
+    def merge_clip_positions_with_cutoff_locus(self, cutoff_left_clip, cutoff_right_clip, max_cov_cutoff, sf_pclip, sf_out):
+        samfile = pysam.AlignmentFile(self.sf_bam, "rb", reference_filename=self.sf_reference)
+        references = samfile.references
+
+        with open(sf_out, "w") as fout_clip_pos:
+            for chrm in references:
+                ##first, load in the whole file into dict
+                m_realign_pos = {}
+                sf_chrm_re_align_clip_pos = self.working_folder + chrm + global_values.CLIP_RE_ALIGN_POS_SUFFIX
+                if os.path.isfile(sf_chrm_re_align_clip_pos) == True:
+                    with open(sf_chrm_re_align_clip_pos) as fin_realign_clip_chrm:
+                        for line in fin_realign_clip_chrm:
+                            fields = line.split()
+                            m_realign_pos[int(fields[0])] = "\t".join(fields[1:])
+                    os.remove(sf_chrm_re_align_clip_pos)
+
+                sf_clip_pos = sf_pclip + chrm + global_values.CLIP_POS_SUFFIX
+                if os.path.isfile(sf_clip_pos) == False:
+                    continue
+                with open(sf_clip_pos) as fin_clip_pos:
+                    for line in fin_clip_pos:
+                        fields = line.split()
+                        pos = int(fields[0])
+                        i_left_clip = int(fields[1])
+                        i_right_clip = int(fields[2])
+                        if i_left_clip < cutoff_left_clip and i_right_clip < cutoff_right_clip:
+                            continue
+                        if (i_left_clip+i_right_clip) > max_cov_cutoff:
+                            continue
+                        if pos in m_realign_pos:
+                            fout_clip_pos.write(chrm + "\t")
+                            fout_clip_pos.write(line.rstrip() + "\t")
+                            fout_clip_pos.write(m_realign_pos[pos] + "\n")
+                        else:
+                            fout_clip_pos.write(chrm + "\t")
+                            fout_clip_pos.write(line.rstrip() + "\t")
+                            fout_clip_pos.write("\t".join([str(0)]*6) + "\n")
+                os.remove(sf_clip_pos)
+        samfile.close()
+####
     def merge_clip_positions_with_cutoff_polyA(
             self, cutoff_left_clip, cutoff_right_clip, max_cov_cutoff, sf_pclip, sf_out):
         samfile = pysam.AlignmentFile(self.sf_bam, "rb", reference_filename=self.sf_reference)

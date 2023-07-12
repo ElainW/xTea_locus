@@ -70,6 +70,48 @@ class XIntermediateSites():
                 m_candidate_sites[pos] = (i_left_cnt, i_right_cnt, i_mate_in_rep_cnt)
         return m_candidate_sites
 ####
+    def parse_sites_with_clip_cutoff_for_chrm_locus(self, m_clip_pos_freq, cutoff_left_clip, cutoff_right_clip,
+                                              cutoff_clip_mate_in_rep):
+        m_candidate_sites = {}
+        for pos in m_clip_pos_freq:
+            ####here need to check the nearby region
+            nearby_left_freq = 0
+            nearby_right_freq = 0
+            nearby_mate_in_rep_Alu, nearby_mate_in_rep_L1, nearby_mate_in_rep_SVA = 0, 0, 0
+            for i in range(-1 * global_values.NEARBY_REGION, global_values.NEARBY_REGION):
+                i_tmp_pos = pos + i
+                if i_tmp_pos in m_clip_pos_freq:
+                    nearby_left_freq += m_clip_pos_freq[i_tmp_pos][0]
+                    nearby_right_freq += m_clip_pos_freq[i_tmp_pos][1]
+                    nearby_mate_in_rep_Alu += (
+                    m_clip_pos_freq[i_tmp_pos][2] + m_clip_pos_freq[i_tmp_pos][5] + m_clip_pos_freq[i_tmp_pos][6])
+                    cns_Alu += m_clip_pos_freq[i_tmp_pos][5] + m_clip_pos_freq[i_tmp_pos][6] # YW 2021/04/23 added
+                    nearby_mate_in_rep_L1 += (
+                    m_clip_pos_freq[i_tmp_pos][3] + m_clip_pos_freq[i_tmp_pos][7] + m_clip_pos_freq[i_tmp_pos][8])
+                    cns_L1 += m_clip_pos_freq[i_tmp_pos][7] + m_clip_pos_freq[i_tmp_pos][8] # YW 2021/04/23 added
+                    nearby_mate_in_rep_SVA += (
+                    m_clip_pos_freq[i_tmp_pos][4] + m_clip_pos_freq[i_tmp_pos][9] + m_clip_pos_freq[i_tmp_pos][10])
+                    cns_SVA += m_clip_pos_freq[i_tmp_pos][9] + m_clip_pos_freq[i_tmp_pos][10] # YW 2021/04/23 added
+
+            b_candidate=False
+            # if nearby_left_freq >= cutoff_left_clip and nearby_right_freq >= cutoff_right_clip \
+            #         and nearby_mate_in_rep >= cutoff_clip_mate_in_rep:
+            #     b_candidate=True
+            if (nearby_left_freq >= cutoff_left_clip or nearby_right_freq >= cutoff_right_clip) \
+                    and (nearby_mate_in_rep_Alu >= cutoff_clip_mate_in_rep or \
+                         nearby_mate_in_rep_L1 >= cutoff_clip_mate_in_rep or \
+                         nearby_mate_in_rep_SVA >= cutoff_clip_mate_in_rep):
+                b_candidate=True
+
+            if b_candidate==True:
+                # if nearby_left_freq >= cutoff_left_clip and nearby_right_freq >= cutoff_right_clip:
+                i_left_cnt = m_clip_pos_freq[pos][0]
+                i_right_cnt = m_clip_pos_freq[pos][1]
+                i_mate_in_rep_cnt_Alu = m_clip_pos_freq[pos][2]
+                i_mate_in_rep_cnt_L1 = m_clip_pos_freq[pos][3]
+                i_mate_in_rep_cnt_SVA = m_clip_pos_freq[pos][4]
+                m_candidate_sites[pos] = (i_left_cnt, i_right_cnt, i_mate_in_rep_cnt_Alu, i_mate_in_rep_cnt_L1, i_mate_in_rep_cnt_SVA)
+        return m_candidate_sites
     ####
     def parse_sites_with_clip_cutoff_for_chrm_with_polyA(self, m_clip_pos_freq, cutoff_left_clip, cutoff_right_clip,
                                               cutoff_clip_mate_in_rep, cutoff_polyA):
