@@ -189,8 +189,20 @@ def parse_option():
                       help="input file2 ", metavar="FILE")
     parser.add_option("-r", "--reference", dest="reference",
                       help="The reference file ", metavar="FILE")
+    parser.add_option("--Alu-reference", dest="Alu_reference",
+                        help="The file with Alu copies with flanking regions", metavar="FILE")
+    parser.add_option("--L1-reference", dest="L1_reference",
+                        help="The file with L1 copies with flanking regions", metavar="FILE")
+    parser.add_option("--SVA-reference", dest="SVA_reference",
+                        help="The file with SVA copies with flanking regions", metavar="FILE")
     parser.add_option("-a", "--annotation", dest="annotation",
                       help="The annotation file ", metavar="FILE")
+    parser.add_option("--Alu-annotation", dest="Alu_annotation",
+                        help="The file with Alu RepeatMasker annotations", metavar="FILE")
+    parser.add_option("--L1-annotation", dest="L1_annotation",
+                        help="The file with L1 RepeatMasker annotations", metavar="FILE")
+    parser.add_option("--SVA-annotation", dest="SVA_annotation",
+                        help="The file with SVA RepeatMasker annotations", metavar="FILE")
     # parser.add_option("-c", "--copies", dest="copies",
     #                   help="Repeat copies ", metavar="FILE")
     parser.add_option("-b", "--bam", dest="bam",
@@ -219,6 +231,12 @@ def parse_option():
                       help="repeat consensus/copies", metavar="FILE")
     parser.add_option("--cns", dest="cns",
                       help="repeat consensus", metavar="FILE")
+    parser.add_option("--Alu-cns", dest="Alu_cns",
+                        help="Alu consensus file", metavar="FILE")
+    parser.add_option("--L1-cns", dest="L1_cns",
+                        help="L1 consensus file", metavar="FILE")
+    parser.add_option("--SVA-cns", dest="SVA_cns",
+                        help="SVA consensus file", metavar="FILE")
     parser.add_option("--sc", dest="siteclip", type="int", default=2,
                       help="cutoff of minimum # of clipped reads at the exact position, use larger value for 10X")
     parser.add_option("--lc", dest="lclip", type="int", default=3,
@@ -249,6 +267,11 @@ def parse_option():
                       help="Reference panel database for filtering, or a blacklist region", metavar="FILE")
     parser.add_option("--model", dest="model", default="null",
                       help="Already trained model (.pkl file) for genotype classification", metavar="FILE")
+    parser.add_option("--locus_clip", 
+                      action="store_true", dest="locus_clip", default=False,
+                      help="Extract clip info from predefined loci")
+    parser.add_option("--locus_file", dest="locus_file",
+                      help="The bed file with predefined loci of polymorphic or reference TEIs, required only when -L", metavar="FILE")
     (options, args) = parser.parse_args()
     return (options, args)
 ####
@@ -298,6 +321,37 @@ def automatic_gnrt_parameters_case_control(sf_bam_list, sf_ref, s_working_folder
           .format(f_cov, par_rcd[0], par_rcd[1], par_rcd[2]))
     return par_rcd, rcd
 
+def load_locus_file(locus_file):
+    '''
+    now also specifying TE families (Alu/L1/SVA)
+    '''
+    m_list = {}
+    with open(locus_file) as fin_candidate_sites:
+        for line in fin_candidate_sites:
+            if line[0] == "#":
+                continue
+            fields = line.split()
+            if len(fields)<3: # chrm pos TE (optional)
+                print(fields, " does not have enough fields")
+                continue
+            elif len(fields) == 3:
+                chrm = fields[0]
+                pos = int(fields[1])
+                family = fields[2]
+                if chrm not in m_list:
+                    m_list[chrm] = [(pos, family)]
+                else:
+                    m_list[chrm].append((pos, family))
+            else: # 2021/11/29 added this to deal with input with both start and end positions
+                chrm = fields[0]
+                start = int(fields[1])
+                end = int(fields[2])
+                family = fields[3]
+                if chrm not in m_list:
+                    m_list[chrm] = [(start,end,family)]
+                else:
+                    m_list[chrm].append((start,end,family))
+    return m_list
 ####
 def adjust_cutoff_tumor(ncutoff=-1, i_adjust=1):
     if ncutoff-i_adjust>1:
@@ -420,6 +474,75 @@ if __name__ == '__main__':
                                                                         cutoff_left_clip, cutoff_right_clip,
                                                                         cutoff_clip_mate_in_rep, b_mosaic,
                                                                         wfolder_pub_clip, b_force, max_cov_cutoff, sf_out)
+    ####
+    elif options.locus_clip:  # NEW OPTIONS FOR PRE-DEFINED LOCI
+        print("Working on \"collecting clip info based on loci\" step!")
+        locus_dict = load_locus_file(options.locus_file)
+        sf_bam_list = options.input
+        # UPDATE THE FOLLOWING in cmd!!!
+        s_working_folder = options.wfolder # YW 2021/03/18 make this not specific to TE (since all processes are shared)
+        n_jobs = options.cores
+
+        # need to properly deal with these
+        sf_rep_cns_Alu = options.Alu_cns
+        sf_rep_cns_L1 = options.L1_cns
+        sf_rep_cns_SVA = options.SVA_cns
+        sf_rep_Alu = options.Alu_reference  ####repeat copies "-r"
+        sf_rep_L1 = options.L1_reference
+        sf_rep_SVA = options.SVA_reference
+        sf_annotation_Alu = options.Alu_annotation
+        sf_annotation_L1 = options.L1_annotation
+        sf_annotation_SVA = options.SVA_annotation
+        
+        sf_out = options.output
+        b_se = options.single  ##single end reads or not, default is not
+        sf_ref=options.ref ###reference genome "-ref"
+        b_force=options.force #force to run from the very beginning
+        b_mosaic=options.mosaic #this is for mosaic calling from normal tissue
+        # YW 2020/08/01 github update b_mosaic
+        # b_mosaic=False #this is for mosaic calling from normal tissue # YW 2021/03/18 set this to False
+        #i_iniclip=options.iniclip#
+        if b_force == True:
+            global_values.set_force_clean()
+        site_clip_cutoff=options.siteclip #this is the cutoff for the exact position, use larger value for 10X
+        global_values.set_initial_min_clip_cutoff(site_clip_cutoff)
+        
+        # YW 2021/09/29 should we keep these?
+        # merge the list from different bams of the same individual
+        # Here when do the filtering, nearby regions are already considered!
+        cutoff_left_clip = options.lclip
+        cutoff_right_clip = options.rclip
+        cutoff_clip_mate_in_rep = options.cliprep
+        
+        print("loaded all input")
+        # YW 2020/08/01 github update: if statement and b_resume
+        if b_resume == False or os.path.isfile(sf_out) == False:
+            if b_automatic==True:
+                rcd, basic_rcd=automatic_gnrt_parameters(sf_bam_list, sf_ref, s_working_folder, n_jobs,
+                                                         b_force, b_tumor, f_purity)
+                cutoff_left_clip=rcd[0]
+                cutoff_right_clip=rcd[0]
+                # if b_tumor==True:
+                #     cutoff_left_clip=adjust_cutoff_tumor(cutoff_left_clip)
+                #     cutoff_right_clip=adjust_cutoff_tumor(cutoff_right_clip)
+                cutoff_clip_mate_in_rep=rcd[2]
+            print("Clip cutoff: {0}, {1}, {2} are used!!!".format(cutoff_left_clip, cutoff_right_clip, cutoff_clip_mate_in_rep))
+            tem_locator = TE_Multi_Locator(sf_bam_list, s_working_folder, n_jobs, sf_ref)
+
+            ####by default, if number of clipped reads is larger than this value, then discard
+            max_cov_cutoff=int(15*options.cov) #by default, this value is 600
+            wfolder_pub_clip = options.cwfolder #public clip folder
+            ##Hard code inside:
+            # 1. call_TEI_candidate_sites_from_clip_reads_v2 --> run_cnt_clip_part_aligned_to_rep_by_chrm_sort_version
+            # here if half of the seq is mapped, then consider it as aligned work.
+            ##2. require >=2 clip reads, whose clipped part is aligned to repeat copies
+            tem_locator.collect_clip_info_from_TEI_candidate_sites(locus_dict,
+                                                                   sf_annotation_Alu, sf_annotation_L1, sf_annotation_SVA,
+                                                                   sf_rep_cns_Alu, sf_rep_cns_L1, sf_rep_cns_SVA,
+                                                                   sf_rep_Alu, sf_rep_L1, sf_rep_SVA,
+                                                                   b_se, cutoff_left_clip, cutoff_right_clip, 
+                                                                   cutoff_clip_mate_in_rep, b_mosaic,
+                                                                   wfolder_pub_clip, b_force, max_cov_cutoff, sf_out)
     ####
     elif options.discordant:  # this views all the alignments as normal illumina reads
         print("Working on \"disc\" step!")
