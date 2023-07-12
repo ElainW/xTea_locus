@@ -7,7 +7,7 @@ from subprocess import *
 import global_values
 import numpy as np
 
-class XIntemediateSites():
+class XIntermediateSites():
     def parse_sites_with_clip_cutoff(self, m_clip_pos_freq, cutoff_left_clip, cutoff_right_clip):
         i_clip_mate_in_rep = 2  ########################################################################################
         m_candidate_sites = {}
