@@ -180,10 +180,10 @@ class XClipDisc():####
                     continue
 
                 clipped_qulity = self._cvt_to_Ascii_quality(query_quality[:l_cigar[0][1]])
-                clipped_rname = "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}".format(chrm, global_values.SEPERATOR, map_pos,
-                                                                            global_values.SEPERATOR, global_values.FLAG_LEFT_CLIP,
-                                                                            global_values.SEPERATOR, is_rc, global_values.SEPERATOR,
-                                                                            insertion_pos, global_values.SEPERATOR, n_cnt_clip)
+                clipped_rname = "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}".format(chrm, global_values.SEPARATOR, map_pos,
+                                                                            global_values.SEPARATOR, global_values.FLAG_LEFT_CLIP,
+                                                                            global_values.SEPARATOR, is_rc, global_values.SEPARATOR,
+                                                                            insertion_pos, global_values.SEPARATOR, n_cnt_clip)
                 n_cnt_clip += 1
 
                 f_clip_fq.write("@" + clipped_rname + "\n")
@@ -205,10 +205,10 @@ class XClipDisc():####
                     continue
 
                 # if map_pos in m_pos:  #soft-clip
-                clipped_rname = "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}".format(chrm, global_values.SEPERATOR, map_pos, global_values.SEPERATOR,
-                                                                            global_values.FLAG_RIGHT_CLIP, global_values.SEPERATOR, is_rc,
-                                                                            global_values.SEPERATOR,
-                                                                            insertion_pos, global_values.SEPERATOR, n_cnt_clip)
+                clipped_rname = "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}".format(chrm, global_values.SEPARATOR, map_pos, global_values.SEPARATOR,
+                                                                            global_values.FLAG_RIGHT_CLIP, global_values.SEPARATOR, is_rc,
+                                                                            global_values.SEPARATOR,
+                                                                            insertion_pos, global_values.SEPARATOR, n_cnt_clip)
                 n_cnt_clip += 1
 
                 start_pos = -1 * l_cigar[-1][1]
@@ -976,7 +976,7 @@ class XClipDiscFilter():
                     b_polyA_dominant=True
 
                 s_extra_info=""
-                s_tmp_id="{0}{1}{2}".format(ins_chrm, global_values.SEPERATOR, ins_pos)
+                s_tmp_id="{0}{1}{2}".format(ins_chrm, global_values.SEPARATOR, ins_pos)
                 b_high_confident=False
                 if s_tmp_id in m_ins_categories[global_values.TWO_SIDE_TPRT_BOTH]:
                     if b_polyA_dominant == True:
@@ -1821,7 +1821,7 @@ class XClipDiscFilter():
              rc_cns_end, ldisc_cns_start, ldisc_cns_end, rdisc_cns_start, rdisc_cns_end,
              s_trsdct_info, n_clip_trsdct, n_disc_trsdct, n_polyA_trsdct) in l_candidates:
 
-            s_id = "{0}{1}{2}".format(ins_chrm, global_values.SEPERATOR, ins_pos)
+            s_id = "{0}{1}{2}".format(ins_chrm, global_values.SEPARATOR, ins_pos)
             # skip those nearby the high coverage island
             if (ins_chrm in m_hcov) and (ins_pos in m_hcov[ins_chrm]):
                 m_ins_categories[global_values.HIGH_COV_ISD][s_id]=1
@@ -1967,7 +1967,7 @@ class XClipDiscFilter():
         m_chrms = {}
         for record in l_chrms:
             sinfo = record['SN']
-            fields = sinfo.split(global_values.SEPERATOR)
+            fields = sinfo.split(global_values.SEPARATOR)
             chrm_name = fields[0]
             m_chrms[chrm_name] = 1
         if ("1" in m_chrms) or ("2" in m_chrms):
@@ -2129,7 +2129,7 @@ class XClipDiscFilter():
 
                 # find out it's 3' or 5' transduction
                 # first find the peak is at first or end
-                # fields=max_copy_pos.split(global_values.SEPERATOR)
+                # fields=max_copy_pos.split(global_values.SEPARATOR)
                 # copy_length=int(fields[-1]) - int(fields[-2])
                 cnt_3 = 0
                 cnt_5 = 0
@@ -2790,7 +2790,7 @@ class XClipDiscFilter():
 
             # In format:chrm~map_pos~FLAG_RIGHT(LEFT)_CLIP~is_reverse_complementary~insertion_position~rid~sample_id
             read_info = algnmt.query_name
-            read_info_fields = read_info.split(global_values.SEPERATOR)
+            read_info_fields = read_info.split(global_values.SEPARATOR)
 
             ori_chrm = read_info_fields[0]
             ref_mpos = int(read_info_fields[1])
@@ -2819,7 +2819,7 @@ class XClipDiscFilter():
             # id in format: chrm~start_pos~end_pos~sub-family
             mapped_copy_id = algnmt.reference_name  # map to which repeat copy
 
-            mapped_copy_fields = mapped_copy_id.split(global_values.SEPERATOR)
+            mapped_copy_fields = mapped_copy_id.split(global_values.SEPARATOR)
             copy_chrm = mapped_copy_fields[0]
             copy_start = int(mapped_copy_fields[1])
             copy_end = int(mapped_copy_fields[2])
@@ -2962,7 +2962,7 @@ class XClipDiscFilter():
 
             # In format:chrm~map_pos~FLAG_RIGHT(LEFT)_CLIP~is_reverse_complementary~insertion_position~rid~sample_id
             read_info = algnmt.query_name
-            read_info_fields = read_info.split(global_values.SEPERATOR)
+            read_info_fields = read_info.split(global_values.SEPARATOR)
 
             ori_chrm = read_info_fields[0]
             ref_mpos = int(read_info_fields[1])
@@ -3129,7 +3129,7 @@ class XClipDiscFilter():
             mapq = algnmt.mapping_quality
             ####also, for clipped mapped reads, need to check the clipped parts whether can be split to two parts!!!!!!
             read_info = algnmt.query_name  # in format: #read_id~is_first~s_insertion_chrm~s_insertion_pos~sample_id
-            read_info_fields = read_info.split(global_values.SEPERATOR)
+            read_info_fields = read_info.split(global_values.SEPARATOR)
             ins_chrm = read_info_fields[-3]
             ins_pos = int(read_info_fields[-2])
             sample_id = read_info_fields[-1]
@@ -3142,7 +3142,7 @@ class XClipDiscFilter():
 
             map_pos_copy = algnmt.reference_start  # map position on repeat copy
             mapped_copy_id = algnmt.reference_name  # map to which repeat copy
-            mapped_copy_fields = mapped_copy_id.split(global_values.SEPERATOR)
+            mapped_copy_fields = mapped_copy_id.split(global_values.SEPARATOR)
             copy_chrm = mapped_copy_fields[0]
             copy_start = int(mapped_copy_fields[1])
             copy_end = int(mapped_copy_fields[2])
@@ -3227,7 +3227,7 @@ class XClipDiscFilter():
                 continue
 
             read_info = algnmt.query_name
-            read_info_fields = read_info.split(global_values.SEPERATOR)
+            read_info_fields = read_info.split(global_values.SEPARATOR)
             s_anchor_lclip=read_info_fields[-8] #anchor read is left clip or not: 1 indicates clip
             s_anchor_rclip=read_info_fields[-7] #anchor read is right clip or not: 1 indicates clip
             s_anchor_rc = read_info_fields[-6]
@@ -3336,14 +3336,14 @@ class XClipDiscFilter():
                         n_cnt = 0
                         for line in fin_tmp_fa:
                             if n_cnt % 2 == 0:
-                                line = line.rstrip() + global_values.SEPERATOR + str(sample_cnt) + "\n"  ###here add the sample id
+                                line = line.rstrip() + global_values.SEPARATOR + str(sample_cnt) + "\n"  ###here add the sample id
                             fout_disc_fa.write(line)
                             n_cnt += 1
                     with open(sf_clip_fa_tmp) as fin_clip_fq:
                         n_cnt = 0
                         for line in fin_clip_fq:
                             if n_cnt % 4 == 0:
-                                line = line.rstrip() + global_values.SEPERATOR + str(sample_cnt) + "\n"
+                                line = line.rstrip() + global_values.SEPARATOR + str(sample_cnt) + "\n"
                             fout_clip_fq.write(line)
                             n_cnt += 1
                     sample_cnt += 1
@@ -3372,7 +3372,7 @@ class XClipDiscFilter():
                         n_cnt = 0
                         for line in fin_clip_fq:
                             if n_cnt % 4 == 0:
-                                line = line.rstrip() + global_values.SEPERATOR + str(sample_cnt) + "\n"
+                                line = line.rstrip() + global_values.SEPARATOR + str(sample_cnt) + "\n"
                             fout_clip_fq.write(line)
                             n_cnt += 1
                     sample_cnt += 1
@@ -3399,7 +3399,7 @@ class XClipDiscFilter():
                         n_cnt = 0
                         for line in fin_tmp_fa:
                             if n_cnt % 2 == 0:
-                                line = line.rstrip() + global_values.SEPERATOR + str(sample_cnt) + "\n"  ###here add the sample id
+                                line = line.rstrip() + global_values.SEPARATOR + str(sample_cnt) + "\n"  ###here add the sample id
                             fout_disc_fa.write(line)
                             n_cnt += 1
                     sample_cnt += 1

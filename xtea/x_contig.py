@@ -683,8 +683,8 @@ class XTEContig():
                 b_qualifed, seq1, seq2 = self.is_qualified_TE_insertion_strict_version_v2(sf_asm_all, sf_algnmt_all,
                                                                                           flank_length, f_map_cutoff,
                                                                                           i_slack)
-                ###Note, here use global_values.SEPERATOR to seperate chrm and pos, in case chrm contains "_"
-                s_site = "{0}{1}{2}".format(select_chrm, global_values.SEPERATOR, tmp_pos)
+                ###Note, here use global_values.SEPARATOR to seperate chrm and pos, in case chrm contains "_"
+                s_site = "{0}{1}{2}".format(select_chrm, global_values.SEPARATOR, tmp_pos)
                 if b_qualifed == True and seq1 != "" and len(seq1) >= mini_TEI_lenth:
                     fout_tei_seqs.write(">" + s_site + "_" + homozygous + "\n")
                     fout_tei_seqs.write(seq1 + "\n")
@@ -818,7 +818,7 @@ class XTEContig():
                     m_final[s_pos] = (m_candidate[contig_id], asm_source, fields[-1])
 
             for s_pos in m_final:
-                s_pos_fields = s_pos.split(global_values.SEPERATOR)
+                s_pos_fields = s_pos.split(global_values.SEPARATOR)
                 fout_chrm_true_positive.write(
                     s_pos_fields[0] + "\t" + s_pos_fields[1] + "\t" + str(m_final[s_pos][0]) + "\t" + m_final[s_pos][1]
                     + "\t" + m_final[s_pos][2] + "\n")
@@ -993,7 +993,7 @@ class XTEContig():
             query_name = algnmt.query_name
             map_pos = algnmt.reference_start
             query_seq = algnmt.query_sequence
-            site_fields = query_name.split(global_values.SEPERATOR)
+            site_fields = query_name.split(global_values.SEPARATOR)
             site_chrm = site_fields[0]
             site_pos = int(site_fields[1])
             s_dir = query_name[-1]  # L or R, direction of the 1st align on ref (before the masking step)
@@ -1042,8 +1042,8 @@ class XTEContig():
                     fout_rslt.write(sinfo)
                     icnt = 0
                     for s_seq in m_seqs[site_chrm][site_pos]:
-                        shead = ">{0}{1}{2}{3}{4}\n".format(site_chrm, global_values.SEPERATOR, site_pos,
-                                                            global_values.SEPERATOR, icnt)
+                        shead = ">{0}{1}{2}{3}{4}\n".format(site_chrm, global_values.SEPARATOR, site_pos,
+                                                            global_values.SEPARATOR, icnt)
                         icnt += 1
                         fout_seqs.write(shead)
                         fout_seqs.write(s_seq + "\n")
@@ -1052,9 +1052,9 @@ class XTEContig():
                         icnt = 0
                         for (s_seq, s_dir) in m_clip_seqs[site_chrm][site_pos]:
                             ####
-                            shead = ">{0}{1}{2}{3}{4}{5}{6}\n".format(site_chrm, global_values.SEPERATOR, site_pos,
-                                                                      global_values.SEPERATOR, s_dir,
-                                                                      global_values.SEPERATOR, icnt)
+                            shead = ">{0}{1}{2}{3}{4}{5}{6}\n".format(site_chrm, global_values.SEPARATOR, site_pos,
+                                                                      global_values.SEPARATOR, s_dir,
+                                                                      global_values.SEPARATOR, icnt)
                             icnt += 1
                             fout_clip.write(shead)
                             fout_clip.write(s_seq + "\n")

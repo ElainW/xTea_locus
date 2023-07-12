@@ -696,7 +696,7 @@ class XTransduction():
         m_sites = {}
         for ins_chrm in m_picked_sites:
             for ins_pos in m_picked_sites[ins_chrm]:
-                s_site = "{0}{1}{2}".format(ins_chrm, global_values.SEPERATOR, ins_pos)
+                s_site = "{0}{1}{2}".format(ins_chrm, global_values.SEPARATOR, ins_pos)
                 if s_site in m_ins_category[global_values.TWO_SIDE]:#skip those insertions with two side information
                     continue
                 m_sites[s_site] = 1
@@ -706,8 +706,8 @@ class XTransduction():
             samfile = pysam.AlignmentFile(sf_clip_algnmt, "r", reference_filename=self.sf_reference)
             for algnmt in samfile.fetch():
                 read_info = algnmt.query_name
-                read_fields = read_info.split(global_values.SEPERATOR)
-                rid_tmp = "{0}{1}{2}".format(read_fields[0], global_values.SEPERATOR, read_fields[-3])
+                read_fields = read_info.split(global_values.SEPARATOR)
+                rid_tmp = "{0}{1}{2}".format(read_fields[0], global_values.SEPARATOR, read_fields[-3])
                 if rid_tmp not in m_sites:
                     continue
                 read_seq = algnmt.query_sequence
@@ -730,8 +730,8 @@ class XTransduction():
             samfile = pysam.AlignmentFile(sf_disc_algnmt, "r", reference_filename=self.sf_reference)
             for algnmt in samfile.fetch():
                 read_info = algnmt.query_name
-                read_fields = read_info.split(global_values.SEPERATOR)
-                rid_tmp = "{0}{1}{2}".format(read_fields[-3], global_values.SEPERATOR, read_fields[-2])
+                read_fields = read_info.split(global_values.SEPARATOR)
+                rid_tmp = "{0}{1}{2}".format(read_fields[-3], global_values.SEPARATOR, read_fields[-2])
                 if rid_tmp not in m_sites:
                     continue
                 read_seq = algnmt.query_sequence
@@ -758,7 +758,7 @@ class XTransduction():
         m_polyA = {}
         for algnmt in samfile.fetch():
             read_info = algnmt.query_name
-            read_info_fields = read_info.split(global_values.SEPERATOR)
+            read_info_fields = read_info.split(global_values.SEPARATOR)
 
             ori_chrm = read_info_fields[0]
             ref_mpos = int(read_info_fields[1])  ##clip position on the reference
@@ -792,7 +792,7 @@ class XTransduction():
             source_end=-1
             sourc_rc="0"
             chrm_fl_L1 =""
-            flank_id_fields = hit_flank_id.split(global_values.SEPERATOR) #because here we are considering "decoy" seqs
+            flank_id_fields = hit_flank_id.split(global_values.SEPARATOR) #because here we are considering "decoy" seqs
             if len(flank_id_fields)>1:
                 chrm_fl_L1 = flank_id_fields[0]
                 source_start = int(flank_id_fields[1])
@@ -988,7 +988,7 @@ class XTransduction():
         m_r_n_source_cand = {}
         for algnmt in samfile.fetch():
             read_info = algnmt.query_name
-            read_info_fields = read_info.split(global_values.SEPERATOR)
+            read_info_fields = read_info.split(global_values.SEPARATOR)
 
             ori_chrm = read_info_fields[0]
             ref_mpos = int(read_info_fields[1])  ##clip position on the reference
@@ -1004,7 +1004,7 @@ class XTransduction():
 
             hit_flank_id = algnmt.reference_name  # e.g. chrY~3443451~3449565~L1HS~0L
 
-            hit_flank_fields=hit_flank_id.split(global_values.SEPERATOR)
+            hit_flank_fields=hit_flank_id.split(global_values.SEPARATOR)
             if len(hit_flank_fields)<2 or hit_flank_fields[-2]==global_values.S_POLYMORPHIC:
                 continue
 
@@ -1023,7 +1023,7 @@ class XTransduction():
             if b_clip_qualified_algned == False:  # skip the unqualified re-aligned parts
                 continue
 
-            flank_id_fields = hit_flank_id.split(global_values.SEPERATOR)
+            flank_id_fields = hit_flank_id.split(global_values.SEPARATOR)
             chrm_fl_L1 = flank_id_fields[0]
             source_start = int(flank_id_fields[1])
             source_end = int(flank_id_fields[2])
@@ -1066,7 +1066,7 @@ class XTransduction():
             for entry in fin:
                 sid=entry.name
                 s_seq=entry.sequence
-                read_info_fields = sid.split(global_values.SEPERATOR)
+                read_info_fields = sid.split(global_values.SEPARATOR)
 
                 ori_chrm = read_info_fields[0]
                 ori_insertion_pos = int(read_info_fields[4])
@@ -1081,7 +1081,7 @@ class XTransduction():
             samfile = pysam.AlignmentFile(sf_disc_sam, "r", reference_filename=self.sf_reference)
             for algnmt in samfile.fetch():
                 read_info = algnmt.query_name
-                read_info_fields = read_info.split(global_values.SEPERATOR)
+                read_info_fields = read_info.split(global_values.SEPARATOR)
                 anchor_map_pos = int(read_info_fields[-4])
                 ins_chrm = read_info_fields[-3]
                 ins_pos = int(read_info_fields[-2])
@@ -1106,7 +1106,7 @@ class XTransduction():
         m_SVA={}
         for algnmt in samfile.fetch():
             read_info = algnmt.query_name
-            read_info_fields = read_info.split(global_values.SEPERATOR)
+            read_info_fields = read_info.split(global_values.SEPARATOR)
             anchor_map_pos = int(read_info_fields[-4])
             ins_chrm = read_info_fields[-3]
             ins_pos = int(read_info_fields[-2])
@@ -1169,7 +1169,7 @@ class XTransduction():
                     m_SVA[ins_chrm][ins_pos] += 1
 
             map_pos = algnmt.reference_start
-            flank_id_fields = hit_flank_id.split(global_values.SEPERATOR) #e.g. 20~32719617~32721485~SVA_D~0R
+            flank_id_fields = hit_flank_id.split(global_values.SEPARATOR) #e.g. 20~32719617~32721485~SVA_D~0R
             if len(flank_id_fields)<3:
                 print("[Error]: Wrong flanking/decoy id: {0}".format(hit_flank_id))
                 continue

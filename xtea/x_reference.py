@@ -109,7 +109,7 @@ class XReference():
             s_left_region = f_fa.fetch(ref_chrm, istart, pos)
             s_right_region = f_fa.fetch(ref_chrm, pos + 1, iend)
 
-            sf_flank_fa = working_folder + "{0}{1}{2}_flanks.fa".format(chrm, global_values.SEPERATOR, pos)
+            sf_flank_fa = working_folder + "{0}{1}{2}_flanks.fa".format(chrm, global_values.SEPARATOR, pos)
             with open(sf_flank_fa, "w") as fout_flank:
                 if b_left==True:
                     fout_flank.write(">{0}\n".format(global_values.LEFT_FLANK))
@@ -150,7 +150,7 @@ class XReference():
             s_left_region = f_fa.fetch(ref_chrm, i_rg_start - i_extend, i_rg_start)
             s_right_region = f_fa.fetch(ref_chrm, i_rg_end, i_rg_end + i_extend)#
 
-            sf_flank_fa = working_folder + "{0}{1}{2}_flanks.fa".format(chrm, global_values.SEPERATOR, i_rg_start)
+            sf_flank_fa = working_folder + "{0}{1}{2}_flanks.fa".format(chrm, global_values.SEPARATOR, i_rg_start)
             with open(sf_flank_fa, "w") as fout_flank:
                 if b_left == True:
                     fout_flank.write(">{0}\n".format(global_values.LEFT_FLANK))
@@ -281,7 +281,7 @@ class XReference():
                                                                       sub_family, global_values.S_DELIM, bi_rc)
                 fout_flanks.write(s_right_head + "\n")
                 fout_flanks.write(s_right_region + "\n")
-                s_id="{0}{1}{2}".format(ins_chrm, global_values.SEPERATOR, ins_pos)
+                s_id="{0}{1}{2}".format(ins_chrm, global_values.SEPARATOR, ins_pos)
                 m_polym_fl_l1_flank[s_id]=(s_left_head, s_left_region, s_right_head, s_right_region)
         f_fa.close()
         return m_polym_fl_l1_flank
@@ -342,7 +342,7 @@ class XReference():
             ref_chrm = self.process_chrm_name(chrm, b_with_chr)
             s_target_region = f_fa.fetch(ref_chrm, istart, iend)
 
-            sf_flank_fa = working_folder + "{0}{1}{2}_flanks.fa".format(chrm, global_values.SEPERATOR, pos)
+            sf_flank_fa = working_folder + "{0}{1}{2}_flanks.fa".format(chrm, global_values.SEPARATOR, pos)
             with open(sf_flank_fa, "w") as fout_flank:
                 fout_flank.write(">target_ref_seq\n")
                 fout_flank.write(s_target_region + "\n")
