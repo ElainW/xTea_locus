@@ -54,7 +54,7 @@ CLIP_RE_ALIGN_POS_SUFFIX = ".clip_realign_pos"
 LCLIP_FA_SUFFIX = '.lr_clipped.fa'  # for long reads or contigs
 FLAG_LEFT_CLIP = "L"
 FLAG_RIGHT_CLIP = "R"
-SEPERATOR = '~'
+SEPARATOR = '~'
 ALL_DISC_SUFFIX = ".initial.all.disc"  # this is to save all the disc reads
 
 #only check polyA in a small region, not the whole clipped part
@@ -80,6 +80,7 @@ PEAK_WINDOW = 100
 OUTPUT_BAM_SUFFIX = ".out_bam"
 OUTPUT_BAM_HEADER = ".bam_header.sam"
 CLIP_FOLDER = "clip"
+CLIP_LOCUS_FOLDER = "clip_locus"
 DISC_FOLDER = "disc"
 DISC_SUFFIX = '.discord_pos.txt'
 DISC_SUFFIX_FILTER = '.discdt'
