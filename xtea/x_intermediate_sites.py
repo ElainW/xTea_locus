@@ -78,6 +78,8 @@ class XIntermediateSites():
             nearby_left_freq = 0
             nearby_right_freq = 0
             nearby_mate_in_rep_Alu, nearby_mate_in_rep_L1, nearby_mate_in_rep_SVA = 0, 0, 0
+            cns_Alu, cns_L1, cns_SVA = 0, 0, 0
+            
             for i in range(-1 * global_values.NEARBY_REGION, global_values.NEARBY_REGION):
                 i_tmp_pos = pos + i
                 if i_tmp_pos in m_clip_pos_freq:
@@ -110,7 +112,9 @@ class XIntermediateSites():
                 i_mate_in_rep_cnt_Alu = m_clip_pos_freq[pos][2]
                 i_mate_in_rep_cnt_L1 = m_clip_pos_freq[pos][3]
                 i_mate_in_rep_cnt_SVA = m_clip_pos_freq[pos][4]
+                # m_candidate_sites[pos] = (i_left_cnt, i_right_cnt, i_mate_in_rep_cnt_Alu, i_mate_in_rep_cnt_L1, i_mate_in_rep_cnt_SVA, cns_Alu, cns_L1, cns_SVA)
                 m_candidate_sites[pos] = (i_left_cnt, i_right_cnt, i_mate_in_rep_cnt_Alu, i_mate_in_rep_cnt_L1, i_mate_in_rep_cnt_SVA)
+            print(m_candidate_sites)
         return m_candidate_sites
     ####
     def parse_sites_with_clip_cutoff_for_chrm_with_polyA(self, m_clip_pos_freq, cutoff_left_clip, cutoff_right_clip,
@@ -316,7 +320,7 @@ class XIntermediateSites():
     ####In this version, we will calculate the standard derivation of the left and right clip cluster
     # In the previous step (call_TEI_candidate_sites), some sites close to each other may be introduced together
     # If there are more than 1 site close to each other, than use the peak site as a representative
-    def call_peak_candidate_sites_with_std_derivation(self, m_candidate_sites, peak_window):
+    def call_peak_candidate_sites_with_std_deviation(self, m_candidate_sites, peak_window):
         m_peak_candidate_sites = {}
         for chrm in m_candidate_sites:
             l_pos = list(m_candidate_sites[chrm].keys())
@@ -351,10 +355,10 @@ class XIntermediateSites():
                     set_cluster.clear()
 
                     ####calculate the left and right cluster standard derivation
-                    f_lclip_std=self.calc_std_derivation(l_lclip_pos)
-                    f_rclip_std=self.calc_std_derivation(l_rclip_pos)
+                    f_lclip_std=self.calc_std_deviation(l_lclip_pos)
+                    f_rclip_std=self.calc_std_deviation(l_rclip_pos)
                     l_rclip_pos.extend(l_lclip_pos)
-                    f_clip_std=self.calc_std_derivation(l_rclip_pos)
+                    f_clip_std=self.calc_std_deviation(l_rclip_pos)
 
                     if chrm not in m_peak_candidate_sites:
                         m_peak_candidate_sites[chrm] = {}
@@ -380,10 +384,10 @@ class XIntermediateSites():
                 l_lclip_pos.extend(l_tmp_lclip)
                 l_rclip_pos.extend(l_tmp_rclip)
             ####calculate the left and right cluster standard derivation
-            f_lclip_std = self.calc_std_derivation(l_lclip_pos)
-            f_rclip_std = self.calc_std_derivation(l_rclip_pos)
+            f_lclip_std = self.calc_std_deviation(l_lclip_pos)
+            f_rclip_std = self.calc_std_deviation(l_rclip_pos)
             l_rclip_pos.extend(l_lclip_pos)
-            f_clip_std = self.calc_std_derivation(l_rclip_pos)
+            f_clip_std = self.calc_std_deviation(l_rclip_pos)
             if chrm not in m_peak_candidate_sites:
                 m_peak_candidate_sites[chrm] = {}
             if tmp_candidate_pos not in m_peak_candidate_sites[chrm]:
@@ -469,7 +473,7 @@ class XIntermediateSites():
                                 #m_brkpnts_sites[chrm][tmp_candidate_pos].append(tmp_pos2)#save the position
                             #in a [-50,50] region, count the number of number of supported reads
 ####
-                        f_tmp_std = self.calc_std_derivation(m_brkpnts_sites[chrm][tmp_candidate_pos])
+                        f_tmp_std = self.calc_std_deviation(m_brkpnts_sites[chrm][tmp_candidate_pos])
                         del l_clip_pos[:]
                         if chrm not in m_peak_candidate_sites:
                             m_peak_candidate_sites[chrm] = {}
@@ -532,7 +536,7 @@ class XIntermediateSites():
                         if tmp_pos2 >= tmp_focal_start and tmp_pos2 <= tmp_focal_end:
                             total_focal_all += tmp_contained2
 
-                f_tmp_std = self.calc_std_derivation(m_brkpnts_sites[chrm][tmp_candidate_pos])
+                f_tmp_std = self.calc_std_deviation(m_brkpnts_sites[chrm][tmp_candidate_pos])
                 del l_clip_pos[:]
                 if chrm not in m_peak_candidate_sites:
                     m_peak_candidate_sites[chrm] = {}
@@ -682,7 +686,7 @@ class XIntermediateSites():
         return False
 
     ####calculate the std derivation of a list of positions
-    def calc_std_derivation(self, l_pos):
+    def calc_std_deviation(self, l_pos):
         if len(l_pos)<=0:
             return -1
         b = np.array([l_pos])
