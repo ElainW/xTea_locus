@@ -282,7 +282,7 @@ class TE_Multi_Locator():
                     fout_sites_merged.write("\t".join([str(i) for i in m_sites_chrm[pos]]) + "\n")
                 
                 #this will use the number of clipped reads within the nearby region
-                m_sites_chrm_filtered = xfilter.parse_sites_with_clip_cutoff_for_chrm(m_sites_chrm, 
+                m_sites_chrm_filtered = xfilter.parse_sites_with_clip_cutoff_for_chrm_locus(m_sites_chrm, 
                                                                                       cutoff_left_clip, cutoff_right_clip,
                                                                                       cutoff_clip_mate_in_rep)
                 for pos in m_sites_chrm_filtered:
@@ -768,11 +768,11 @@ class TELocator():
 
     # YW 2021/09/29 new function: don't collect clip position, directly collect clipped parts for two-stage realignment
     def collect_clip_read_from_TEI_candidate_sites(self, locus_dict, sf_annotation_Alu, sf_annotation_L1, sf_annotation_SVA,
-                            sf_rep_cns_Alu, sf_rep_cns_L1, sf_rep_cns_SVA,
-                            sf_rep_Alu, sf_rep_L1, sf_rep_SVA,
-                            b_se, cutoff_left_clip,
-                            cutoff_right_clip, b_cutoff, sf_pub_folder, idx_bam,
-                            b_force, max_cov_cutoff, sf_out): # YW 2021/03/18 take out max_cov_cutoff later
+                                                   sf_rep_cns_Alu, sf_rep_cns_L1, sf_rep_cns_SVA,
+                                                   sf_rep_Alu, sf_rep_L1, sf_rep_SVA,
+                                                   b_se, cutoff_left_clip,
+                                                   cutoff_right_clip, b_cutoff, sf_pub_folder, idx_bam,
+                                                   b_force, max_cov_cutoff, sf_out): # YW 2021/03/18 take out max_cov_cutoff later
         # this is a public folder for different type of repeats to share the clipped reads
         if sf_pub_folder[-1]!="/":
             sf_pub_folder+="/"
@@ -792,7 +792,7 @@ class TELocator():
         sf_bam_name = os.path.basename(self.sf_bam)
         sf_all_clip_fq = sf_pub_folder + sf_bam_name + global_values.CLIP_FQ_SUFFIX
         clip_info.set_working_folder(sf_clip_working_folder)
-        sf_all_clip_fq_ori=sf_clip_working_folder+sf_bam_name + global_values.CLIP_FQ_SUFFIX ### THIS IS NOT IN XTEA
+        sf_all_clip_fq_ori=sf_clip_working_folder+sf_bam_name + global_values.CLIP_FQ_SUFFIX
         if os.path.islink(sf_all_clip_fq)==False or b_force==True:
             print("Collected clipped reads file {0} doesn't exist. Generate it now!".format(sf_all_clip_fq))
             ##collect the clip positions
@@ -826,11 +826,11 @@ class TELocator():
         
         ####cnt number of clipped reads aligned to repeat copies from the re-alignment
         # YW 2021/03/18 add Alu, L1, SVA
-        clip_info.cnt_clip_part_aligned_to_rep_locus(sf_algnmt_Alu, sf_algnmt_L1, sf_algnmt_SVA)  ##require at least 3/4 of the seq is mapped !!!!
+        clip_info.cnt_clip_part_aligned_to_rep(sf_algnmt_Alu, sf_algnmt_L1, sf_algnmt_SVA)  ##require at least 3/4 of the seq is mapped !!!!
 
         # if b_cutoff is set, then directly return the dict
         if b_cutoff == False:
-            clip_info.merge_clip_positions(sf_pub_folder, sf_out)
+            clip_info.merge_clip_positions_locus(sf_pub_folder, sf_out)
         else:
             clip_info.merge_clip_positions_with_cutoff_locus(cutoff_left_clip, cutoff_right_clip, max_cov_cutoff, sf_pub_folder, sf_out)
         if os.path.isfile(sf_algnmt_Alu)==True:####remove the file

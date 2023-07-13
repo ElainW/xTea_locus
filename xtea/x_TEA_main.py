@@ -272,6 +272,9 @@ def parse_option():
                       help="Extract clip info from predefined loci")
     parser.add_option("--locus_file", dest="locus_file",
                       help="The bed file with predefined loci of polymorphic or reference TEIs, required only when -L", metavar="FILE")
+    parser.add_option("--locus_disc", 
+                      action="store_true", dest="locus_disc", default=False,
+                      help="Extract disc info from predefined loci")
     (options, args) = parser.parse_args()
     return (options, args)
 ####
@@ -514,7 +517,6 @@ if __name__ == '__main__':
         cutoff_right_clip = options.rclip
         cutoff_clip_mate_in_rep = options.cliprep
         
-        print("loaded all input")
         # YW 2020/08/01 github update: if statement and b_resume
         if b_resume == False or os.path.isfile(sf_out) == False:
             if b_automatic==True:
@@ -526,7 +528,7 @@ if __name__ == '__main__':
                 #     cutoff_left_clip=adjust_cutoff_tumor(cutoff_left_clip)
                 #     cutoff_right_clip=adjust_cutoff_tumor(cutoff_right_clip)
                 cutoff_clip_mate_in_rep=rcd[2]
-            print("Clip cutoff: {0}, {1}, {2} are used!!!".format(cutoff_left_clip, cutoff_right_clip, cutoff_clip_mate_in_rep))
+            print("Clip cutoff: lclip: {0}, rclip: {1}, clip_mate_in_rep: {2} are used!!!".format(cutoff_left_clip, cutoff_right_clip, cutoff_clip_mate_in_rep))
             tem_locator = TE_Multi_Locator(sf_bam_list, s_working_folder, n_jobs, sf_ref)
 
             ####by default, if number of clipped reads is larger than this value, then discard
@@ -558,12 +560,66 @@ if __name__ == '__main__':
             PEAK_WINDOW = 30
 
         if b_resume == False or os.path.isfile(sf_out) == False:
-            xfilter = XIntemediateSites()
+            xfilter = XIntermediateSites()
             m_original_sites = xfilter.load_in_candidate_list(sf_candidate_list)
             sf_peak_sites = s_working_folder + "clip_peak_candidate.list"
             #m_sites_clip_peak = xfilter.call_peak_candidate_sites(m_original_sites, PEAK_WINDOW)  # get the peak sites
             # get the peak sites
-            m_sites_clip_peak = xfilter.call_peak_candidate_sites_with_std_derivation(m_original_sites, PEAK_WINDOW)
+            m_sites_clip_peak = xfilter.call_peak_candidate_sites_with_std_deviation(m_original_sites, PEAK_WINDOW)
+            xfilter.output_candidate_sites(m_sites_clip_peak, sf_peak_sites)  # output the sites
+            m_original_sites.clear()  #release the memory
+
+            b_force = True
+            rcd, basic_rcd = automatic_gnrt_parameters(sf_bam_list, sf_ref, s_working_folder, n_jobs,
+                                                       b_force, b_tumor, f_purity)
+            rlth = basic_rcd[1]  # read length
+            mean_is = basic_rcd[2]  # mean insert size
+            std_var = basic_rcd[3]  # standard derivation
+            max_is = int(mean_is + 3 * std_var) + int(rlth)
+            iextend = max_is
+            i_is = 100000  ###set the insert size a large value, by default 100k
+            f_dev = std_var
+
+            # this is the cutoff for  "left discordant" and "right discordant"
+            # Either of them is larger than this cutoff, the site will be reported
+            n_disc_cutoff = options.ndisc
+            if b_automatic==True:
+                n_disc_cutoff=rcd[1]
+                # if b_tumor==True:
+                #     n_disc_cutoff = adjust_cutoff_tumor(n_disc_cutoff, 0)
+            print("Discordant cutoff: {0} is used!!!".format(n_disc_cutoff))
+
+            sf_tmp = s_working_folder + "disc_tmp.list"
+            sf_raw_disc=sf_out + global_values.RAW_DISC_TMP_SUFFIX #save the left and right raw disc for each site
+            tem_locator = TE_Multi_Locator(sf_bam_list, s_working_folder, n_jobs, sf_ref)
+            tem_locator.filter_candidate_sites_by_discordant_pairs_multi_alignmts(m_sites_clip_peak, iextend, i_is,
+                                                                                  f_dev, n_disc_cutoff, sf_annotation,
+                                                                                  sf_tmp, sf_raw_disc, b_tumor)
+            xfilter.merge_clip_disc(sf_tmp, sf_candidate_list, sf_out)
+####
+    ####
+    elif options.locus_disc:  # this views all the alignments as normal illumina reads
+        print("Working on \"collecting disc info based on loci\" step!")
+        sf_bam_list = options.bam  ###read in a bam list file
+        s_working_folder = options.wfolder
+        n_jobs = options.cores
+        sf_annotation_Alu = options.Alu_annotation
+        sf_annotation_L1 = options.L1_annotation
+        sf_annotation_SVA = options.SVA_annotation
+        sf_candidate_list = options.input
+        sf_out = options.output
+        sf_ref = options.ref  ###reference genome, some cram file require this file to open
+        PEAK_WINDOW = 100
+        if options.postFmosaic or options.somatic:#for mosaic events
+            PEAK_WINDOW = 30
+
+        if b_resume == False or os.path.isfile(sf_out) == False:
+            xfilter = XIntermediateSites()
+            m_original_sites = xfilter.load_in_candidate_list(sf_candidate_list)
+            sf_peak_sites = s_working_folder + "clip_peak_candidate.list"
+            #m_sites_clip_peak = xfilter.call_peak_candidate_sites(m_original_sites, PEAK_WINDOW)  # get the peak sites
+            # get the peak sites
+            m_sites_clip_peak = xfilter.call_peak_candidate_sites_with_std_deviation(m_original_sites, PEAK_WINDOW)
             xfilter.output_candidate_sites(m_sites_clip_peak, sf_peak_sites)  # output the sites
             m_original_sites.clear()  #release the memory
 
@@ -612,7 +668,7 @@ if __name__ == '__main__':
         sf_cns = options.reference  ####repeat copies/cns here
         bmapped_cutoff = global_values.MIN_CLIP_MAPPED_RATIO
         sf_annotation = options.annotation
-        i_concord_dist = 550  # this should be the 3*std_derivation, used to cluster disc reads on the consensus
+        i_concord_dist = 550  # this should be the 3*std_deviation, used to cluster disc reads on the consensus
         f_concord_ratio = 0.45
         sf_output = options.output
         sf_flank=options.fflank #this is the flanking region
@@ -973,7 +1029,7 @@ if __name__ == '__main__':
         sf_out = options.output
         sf_ref = options.ref  ###reference genome, some cram file require this file to open
 
-        xfilter = XIntemediateSites()
+        xfilter = XIntermediateSites()
         m_input_sites = xfilter.load_in_candidate_list(sf_candidate_list)
 
         iextend = 2500
