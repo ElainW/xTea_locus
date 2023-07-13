@@ -25,7 +25,7 @@ class CaseControlMode():
         self.iextnd = 400  ###for each site, re-collect reads in range [-iextnd, iextnd], this around ins +- 3*derivation
         self.bin_size = 50000000  # block size for parallelization
         self.bmapped_cutoff = 0.65
-        self.i_concord_dist = 550  # this should be the 3*std_derivation, used to cluster disc reads on the consensus
+        self.i_concord_dist = 550  # this should be the 3*std_deviation, used to cluster disc reads on the consensus
         self.f_concord_ratio = 0.45
         self.CLIP_CONSIST_DIST=35
         self.DISC_CONSIST_DIST=50

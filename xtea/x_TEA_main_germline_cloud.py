@@ -445,7 +445,7 @@ if __name__ == '__main__':
             sf_peak_sites = s_working_folder + "clip_peak_candidate.list"
             #m_sites_clip_peak = xfilter.call_peak_candidate_sites(m_original_sites, PEAK_WINDOW)  # get the peak sites
             # get the peak sites
-            m_sites_clip_peak = xfilter.call_peak_candidate_sites_with_std_derivation(m_original_sites, PEAK_WINDOW)
+            m_sites_clip_peak = xfilter.call_peak_candidate_sites_with_std_deviation(m_original_sites, PEAK_WINDOW)
             xfilter.output_candidate_sites(m_sites_clip_peak, sf_peak_sites)  # output the sites
             m_original_sites.clear()  #release the memory
 
@@ -494,7 +494,7 @@ if __name__ == '__main__':
         sf_cns = options.reference  ####repeat copies/cns here
         bmapped_cutoff = global_values.MIN_CLIP_MAPPED_RATIO
         sf_annotation = options.annotation
-        i_concord_dist = 550  # this should be the 3*std_derivation, used to cluster disc reads on the consensus
+        i_concord_dist = 550  # this should be the 3*std_deviation, used to cluster disc reads on the consensus
         f_concord_ratio = 0.45
         sf_output = options.output
         sf_flank=options.fflank #this is the flanking region
